@@ -41,4 +41,6 @@ if [ "$(aws ecs list-tasks --service-name $ECS_SERVICE --region $AWS_DEFAULT_REG
     TASK_ARN="${TEMP_ARN%\"}" # strip double quotes
     TASK_ARN="${TASK_ARN#\"}" # strip double quotes
     aws ecs stop-task --task $TASK_ARN --region $AWS_DEFAULT_REGION > /dev/null # Stop current task to force start of new task revision with new image
+else
+    echo "No tasks found for $ECS_SERVICE ..."
 fi
