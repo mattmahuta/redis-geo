@@ -23,6 +23,7 @@ else
     aws ecr create-repository --repository-name $IMAGE_NAME
 fi
 
+echo "Image to push: $AWS_ECS_REPO_DOMAIN/$IMAGE_NAME:$IMAGE_VERSION"
 docker push $AWS_ECS_REPO_DOMAIN/$IMAGE_NAME:$IMAGE_VERSION
 
 aws ecs register-task-definition --cli-input-json file://new-task-definition.json --region $AWS_DEFAULT_REGION > /dev/null # Create a new task revision
@@ -38,8 +39,10 @@ else
 fi
 if [ "$(aws ecs list-tasks --service-name $ECS_SERVICE --region $AWS_DEFAULT_REGION | jq '.taskArns' | jq 'length')" -gt "0" ]; then
     TEMP_ARN=$(aws ecs list-tasks --service-name $ECS_SERVICE --region $AWS_DEFAULT_REGION | jq '.taskArns[0]') # Get current running task ARN
+    echo "Temp ARN: TEMP_ARN"
     TASK_ARN="${TEMP_ARN%\"}" # strip double quotes
     TASK_ARN="${TASK_ARN#\"}" # strip double quotes
+    echo "Task ARN: TASK_ARN"
     aws ecs stop-task --task $TASK_ARN --region $AWS_DEFAULT_REGION > /dev/null # Stop current task to force start of new task revision with new image
 else
     echo "No tasks found for $ECS_SERVICE ..."
